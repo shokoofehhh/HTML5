@@ -1,0 +1,120 @@
+<html>
+<head>
+<script>
+function clickCounter(){
+if (typeof(storage)!=="undefined"){
+if(sessionStorage.clickcount){
+sessionStorage.clickcount=Number(sessionStorage.clickcount)+1;
+}else {
+sessionStorage.clickcount=1;
+}
+document.getElementById("result").innerHTML="you have click the button"+sessionStorage.clickcount+"time(s).";
+}else{
+document.getElementById("result").innerHTML="sorry, your browser does not support web storage";
+}
+}
+</script>
+<style>
+#div1,#div2{
+float:left;
+width:100px;
+height:35px;
+margin:10px;
+padding:10px;
+border:1px solid black;
+}
+</style>
+<script>
+function allowDrop(ev){
+ev.preventDefault();
+}
+function drag(ev){
+ev.dataTransfer.setData("text",ev.target.id);
+}
+function drop(ev){
+ev.preventDefault();
+var data=ev.dataTransfer.getData("text");
+ev.target.appendChild(document.getElementById(data));
+}
+</script>
+</head>
+<body>
+<p>Click the button to get your coordinates.</p>
+<button onclick="getLocation()">ok</button>
+<p id="demo"></p>
+<script>
+var x=document.getElementById("demo");
+function getLocation(){
+if (navigator.geoLocation){
+navigator.geolocation.getCurrentPosition(showPosition,showError);
+} else{
+x.innerHTML="Geolocation is not supported by this browser";
+}
+}
+function showPosition(position){
+x.innerHTML="Latitude:"+position.coords.latitude+
+"<br>longitude:"+position.coords.longitude;
+}
+function showError(error){
+switch(error.code){
+case error.PERMISSION_DENIED:
+x.innerHTML="user denied the request for geolocation"
+break;
+case error.POSITION_UNAVAILABLE:
+x.innerHTML="location information is unvailable"
+break;
+case error.TIMEOUT:
+x.innerHTML="the request to get user location timed out"
+break;
+case error.UNKNOWN_ERROR:
+x.innerHTML="An unknown error occurred"
+break;
+}
+}
+</script>
+<hr>
+<p>drag&drop</p>
+<div id="div1" ondrop="drop(event)" ondragover="allowDrop(event)">
+<img  src="img_w3slogo.gif" draggable="true" ondragstart="drag(event)" id="drag1" width="88" height="31">
+</div>
+<div id="div2" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+<br><br>
+<p><button onclick="clickCounter()" type="button">click me!</button></p><br><br>
+<div id="result"></div>
+<hr>
+<p> count numbers:<output id="result"></output></p>
+<button onclick="startWorker()">start</button>
+<button onclick="stopWorker()">stop</button>
+<script>
+var w;
+function startWorker(){
+if(typeof(Worker) !=="undefined"){
+if(typeof(w)=="undefined"){
+w=new worker("demo_workers.js");
+}
+w.onmessage=function(event){
+document.getElementById("result").innerHTML=event.data;
+};
+}else{
+document.getElementById("result").innerHTML="sorry";
+}
+}
+function stopWorker(){
+w.terminate();
+w=undefined;
+}
+</script>
+<hr>
+<script>
+<div id="result"></div>
+if(typeof(EventSource)!=="undefined"){
+var source=new EventSource("demo_sse.php");
+source.onmessage=function(event){
+document.getElementById("result").innerHTML+=event.data+"<br>";
+};
+}else{
+document.getElementById("result").innerHTML="sorry";
+}
+</script>
+</body>
+</html>
